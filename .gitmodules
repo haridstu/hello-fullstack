@@ -1,6 +1,3 @@
-[submodule "hello-api"]
-    path = hello-api
-	url = https://github.com/haridstu/hello-api.git
 [submodule "hello-react"]
     path = hello-react
 	url = https://github.com/haridstu/hello-react.git
