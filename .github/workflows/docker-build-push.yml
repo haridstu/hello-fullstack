@@ -2,39 +2,41 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
-
-      # 🔹 Build and push API image
-      - name: Build and push backend (FastAPI)
-        uses: docker/build-push-action@v5
         with:
-          context: ./hello-api
-          file: ./hello-api/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-api:latest
+          submodules: true   # ✅ this is the key line
+          fetch-depth: 0
 
-      # 🔹 Build and push React image
-      - name: Build and push frontend (React)
-        uses: docker/build-push-action@v5
-        with:
-          context: ./hello-react
-          file: ./hello-react/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-react:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # 🔹 Log in to Docker Hub
-      - name: Log in to Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./hello-api     # ✅ point to where your Dockerfile lives
+          file: ./hello-api/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-api:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./hello-react   # ✅ point to where your React Dockerfile lives
+          file: ./hello-react/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-react:latest
