@@ -1,12 +1,4 @@
-name: Build & Push Docker Images
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
- name: Build and Push Docker Images
+name: Build and Push Docker Images
 
 on:
   push:
