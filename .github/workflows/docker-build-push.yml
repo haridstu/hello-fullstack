@@ -6,33 +6,43 @@ on:
       - main
 
 jobs:
-  build-and-push:
+ name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Step 2: Set up Docker Buildx
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # 🔹 Build and push API image
+      - name: Build and push backend (FastAPI)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./hello-api
+          file: ./hello-api/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-api:latest
 
-      # Step 3: Log in to Docker Hub
+      # 🔹 Build and push React image
+      - name: Build and push frontend (React)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./hello-react
+          file: ./hello-react/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-react:latest
+
+      # 🔹 Log in to Docker Hub
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Step 4: Build and push backend
-      - name: Build and push backend
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/hello-api:latest ./hello-api
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/hello-api:latest
-
-      # Step 5: Build and push frontend
-      - name: Build and push frontend
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/hello-react:latest ./hello-react
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/hello-react:latest
