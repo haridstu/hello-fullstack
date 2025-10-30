@@ -10,10 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository (with submodules)
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: true   # ✅ this is the key line
           fetch-depth: 0
 
       - name: Set up Docker Buildx
@@ -25,18 +24,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Extract Short SHA
+        id: vars
+        run: echo "SHA=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
+
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
-          context: ./hello-api     # ✅ point to where your Dockerfile lives
+          context: ./hello-api
           file: ./hello-api/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-api:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/hello-api:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/hello-api:${{ steps.vars.outputs.SHA }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
         with:
-          context: ./hello-react   # ✅ point to where your React Dockerfile lives
+          context: ./hello-react
           file: ./hello-react/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-react:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/hello-react:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/hello-react:${{ steps.vars.outputs.SHA }}
