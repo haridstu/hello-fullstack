@@ -50,17 +50,19 @@ class TaskUpdate(SQLModel):
 # -----------------------------
 app = FastAPI()
 
-# Read allowed origins from environment variable or fallback to "*"
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# Read from environment or default to your VM IP and localhost
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://40.65.90.217,http://localhost:3000"
+).split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=[origin.strip() for origin in allowed_origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 def get_session():
     with Session(engine) as session:
