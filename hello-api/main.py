@@ -50,13 +50,17 @@ class TaskUpdate(SQLModel):
 # -----------------------------
 app = FastAPI()
 
+# Read allowed origins from environment variable or fallback to "*"
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://hello-react-hgne.onrender.com"],  # React URL
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 def get_session():
     with Session(engine) as session:
