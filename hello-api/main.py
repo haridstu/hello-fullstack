@@ -53,7 +53,7 @@ app = FastAPI()
 # Read from environment or default to your VM IP and localhost
 allowed_origins = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://40.65.90.217,http://4.155.140.216,http://20.3.6.197:8000,http://localhost:3000"
+    "*,http://40.65.90.217,http://4.155.140.216,http://20.3.6.197:8000,http://localhost:3000"
 ).split(",")
 
 app.add_middleware(
